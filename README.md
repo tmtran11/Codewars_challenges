@@ -1,1 +1,1 @@
-# codewar_challenge
+# Interesting challenges from Codewar and my approaches
