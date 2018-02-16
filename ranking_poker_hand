@@ -1,0 +1,42 @@
+class PokerHand(object):
+    
+    def __init__(self, a):
+        self.hand = a.split()
+        
+        
+    def compare_with(self, other):
+        rep = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'T':10,'J':11,'Q':12,'K':13,'A':14,'S':15,'C':16,'D':17,'H':18}
+        alphabet = "23456789TJQKAHSDC"
+        x1 = sorted(self.hand, key=lambda word: [alphabet.index(c) for c in word])
+        x2 = sorted(other.hand, key=lambda word: [alphabet.index(c) for c in word])
+        com = []
+        for a in [x1,x2]:
+            print(a)
+            eval = [[0,0]]*5
+            eval.append(0)
+            val = [x[0] for x in a]
+            suit = [x[1] for x in a]
+            if alphabet.find(''.join(val))!=-1: eval[0] = [6,sum([rep[x] for x in val])]
+            if 4 in [val.count(x) for x in val]: eval[1] = [8,sum([rep[x] if val.count(x)==4 else 0 for x in val])]
+            if 3 in [val.count(x) for x in val]: eval[2] = [5,sum([rep[x] if val.count(x)==3 else 0 for x in val])]
+            if 2 in [val.count(x) for x in val]: eval[3] = [[val.count(x) for x in val].count(2), sum([rep[x] if val.count(x)==2 else 0 for x in val])]
+            if 5 in [suit.count(x) for x in suit]: eval[4] = [6.5,sum([rep[ch] for ch in val])]
+            com.append(eval)
+
+        com[0][5] = sum([x[1] for x in com[0][0:5]])
+        com[1][5] = sum([x[1] for x in com[1][0:5]])
+        
+        #
+        if sum([x[0] for x in com[0][0:5]])>sum([x[0] for x in com[1][0:5]]): return "Win"
+        elif sum([x[0] for x in com[0][0:5]])<sum([x[0] for x in com[1][0:5]]): return "Loss"
+        elif com[0][5]>com[1][5]: return "Win"
+        elif com[0][5]<com[1][5]: return "Loss"
+        else: 
+            x1.reverse()
+            x2.reverse()
+            for n,x in enumerate([a[0] for a in x1]):
+                if rep[x]>rep[x2[n][0]]:
+                    return "Win"
+                if rep[x]<rep[x2[n][0]]:
+                    return "Loss"
+            return "Tie"
