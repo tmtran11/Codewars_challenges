@@ -1,0 +1,35 @@
+# translate chemical formular to a dictionary contain each each atoms and it relive quantity
+
+from operator import mul
+from functools import reduce
+def parse_molecule (f):
+    formula = []
+    for n,x in enumerate(f):
+        if not x.islower():
+            if x.isupper() and n<len(f)-1 and f[n+1].islower():
+                formula.append(x+f[n+1])
+            elif x.isdigit() and n<len(f)-1 and f[n+1].isdigit() and n>0 and not f[n-1].isdigit():
+                formula.append(x+f[n+1])
+            else:
+                formula.append(x)
+    depth, br, ind, all = 0, [n for n,x in enumerate(formula) if x in ['[',']','{','}','(',')']], {}, []
+    for x in br:
+        if formula[x] in ['[','{','(']: 
+            ind.update({depth:x})
+            depth+=1
+        else: 
+            depth-=1
+            if formula[x+1].isdigit():
+                all.append([ind[depth],x,int(formula[x+1])])
+            else:
+                all.append([ind[depth],x,1])
+    result = {}
+    for n,x in enumerate(formula):
+        if x.isupper() or x[0].isupper():
+            m = [i[2] for i in all if n>i[0] and n<i[1]]
+            if n<len(formula)-1:
+                if formula[n+1].isdigit():
+                    m.append(int(formula[n+1]))
+            if x not in result: result.update({x:reduce(mul,m,1)})
+            else: result.update({x:result[x]+reduce(mul,m,1)})
+    return result
