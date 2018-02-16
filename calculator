@@ -1,0 +1,32 @@
+# create a calultor to handle any math with operator +, -, *, /
+
+import operator
+
+class Calculator(object):
+    def evaluate(self, string):
+        ops = { '+': operator.add, '-': operator.sub, '*': operator.mul, '/': operator.div } 
+        token = string.split()
+        print(token)
+        
+        n = 1
+        while n<len(token)-1:
+            dec = sum([len(str(x).split('.')[1]) if str(x).find('.')!=-1 else 0 for x in [token[n-1],token[n+1]]])
+            if token[n]=='/' or token[n]=='*':
+                token[n]=ops[token[n]](float(token[n-1]),float(token[n+1]))
+                token[n]=round(token[n],dec)
+                del token[n+1]
+                del token[n-1]
+            else: n +=1
+        
+        mdec = max([len(str(x).split('.')[1]) if str(x).find('.')!=-1 else 0 for x in token])
+        x = 0
+        plus = [float(token[0])]
+        minus = []
+        while x<len(token)-1:
+            if token[x]=='+': 
+                plus.append(float(token[x+1]))
+            if token[x]=='-': 
+                minus.append(float(token[x+1]))
+            x+=1
+        print(plus)
+        return round(float(sum(plus))-float(sum(minus)),mdec)
