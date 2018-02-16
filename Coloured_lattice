@@ -1,0 +1,36 @@
+# given vertices with their coordinate and colour, count the number of triangles with all side of same colour
+# return a tuple of numbers, each number represent the number of triangle in one of the colour
+
+import itertools
+import fractions
+
+def count_col_triang(input_):
+    group = {}
+    t = []
+    for x in input_:
+        if not x[1] in group: group.update({x[1]: [x[0]]})
+        else: group.update({x[1]: group[x[1]]+[x[0]]})
+    for x in sorted(group):
+        tri = 0
+        temp = 0
+        if len(group[x])>2:
+            eval = list(itertools.combinations(group[x],3))
+            for i in eval:
+                temp = tri
+                if (i[0][0]-i[1][0])!=0 and (i[1][0]-i[2][0])!=0 and fractions.Fraction((i[0][1]-i[1][1]),(i[0][0]-i[1][0]))-fractions.Fraction((i[1][1]-i[2][1]),(i[1][0]-i[2][0]))!=0:
+                    tri+=1
+                elif (i[0][0]-i[1][0])!=0 and (i[0][0]-i[2][0])!=0 and fractions.Fraction((i[0][1]-i[1][1]),(i[0][0]-i[1][0]))-fractions.Fraction((i[0][1]-i[2][1]),(i[0][0]-i[2][0]))!=0:
+                    tri+=1
+                elif (i[0][0]-i[2][0])!=0 and (i[1][0]-i[2][0])!=0 and fractions.Fraction((i[0][1]-i[2][1]),(i[0][0]-i[2][0]))-fractions.Fraction((i[1][1]-i[2][1]),(i[1][0]-i[2][0]))!=0:
+                    tri+=1
+        t.append([[x],tri])
+    temp = max([x[1] for x in t])
+    m = [x for x in t if x[1]==temp]
+    final = []
+    if len(m)==1: final=[m[0][0][0],m[0][1]]
+    elif len(m)==len(t): final=[]
+    else:
+        for i in m:
+            final.append(i[0][0])
+        final.append(temp)
+    return [len(input_), len(t), sum([x[1] for x in t]), final]
