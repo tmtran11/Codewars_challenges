@@ -1,0 +1,17 @@
+def has_exit(maze):
+    temp = list(''.join(maze))
+    if temp.count('k')>1: raise Exception('There should no be multiple Kates')
+    r, c = temp.index('k')//len(maze[0]), temp.index('k')%len(maze[0])
+    bfs = [[r,c]]
+    i = 0
+    while i!=len(bfs):
+        print(bfs)
+        r = bfs[i][0]
+        c = bfs[i][1]
+        if r==0 or c==0 or r==len(maze)-1 or c==len(maze[0])-1: return True
+        if r>0 and maze[r-1][c]==' ' and not [r-1,c] in bfs: bfs.append([r-1,c])
+        if r<len(maze)-1 and maze[r+1][c]==' ' and not [r+1,c] in bfs: bfs.append([r+1,c])
+        if c>0 and maze[r][c-1]==' ' and not [r,c-1] in bfs: bfs.append([r,c-1])
+        if c<len(maze[0])-1 and maze[r][c+1]==' ' and not [r,c+1] in bfs: bfs.append([r,c+1])
+        i+=1
+    return False
