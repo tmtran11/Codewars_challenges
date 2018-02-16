@@ -1,0 +1,45 @@
+# given a 2D array of pixel, find the pixels of given coulour with have the highest depth.
+# depth in here mean the shortest distance of that pixel to a pixel of different color
+
+class Central_Pixels_Finder(Image):
+
+    def central_pixels(self, colour):
+        explored = [False] * (self.width * self.height)
+        center = set()
+        pos = 0
+        for r in range(self.height):
+            for c in range(self.width):
+                if (self.pixels[pos] == colour and
+                    (r == 0 or r == self.height - 1 or c == 0 or c == self.width - 1 or
+                     self.pixels[pos - 1] != colour or self.pixels[pos - self.width] != colour or
+                     self.pixels[pos + 1] != colour or self.pixels[pos + self.width] != colour)):
+                    center.add((r, c))
+                    explored[pos] = True
+                pos += 1
+        while True: # Run BFS
+            next_center = set()
+            for r, c in center:
+                pos = r * self.width + c
+                if r > 0:
+                    up = pos - self.width
+                    if self.pixels[up] == colour and not explored[up]:
+                        explored[up] = True
+                        next_center.add((r - 1, c))
+                if c > 0:
+                    left = pos - 1
+                    if self.pixels[left] == colour and not explored[left]:
+                        explored[left] = True
+                        next_center.add((r, c - 1))
+                if r < self.height - 1:
+                    down = pos + self.width
+                    if self.pixels[down] == colour and not explored[down]:
+                        explored[down] = True
+                        next_center.add((r + 1, c))
+                if c < self.width - 1:
+                    right = pos + 1
+                    if self.pixels[right] == colour and not explored[right]:
+                        explored[right] = True
+                        next_center.add((r, c + 1))
+            if not next_center:
+                return list(r * self.width + c for r, c in center)
+            center = next_center
