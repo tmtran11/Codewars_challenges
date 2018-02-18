@@ -1,0 +1,109 @@
+"""
+This kata is inspired by Plants vs. Zombies, a tower defense video game developed and originally published by PopCap Games.
+
+The battlefield is the front lawn and the zombies are coming. Our defenses (consisting of pea-shooters) are in place and we've got the stats of each attacking zombie. Your job is to figure out how long it takes for them to penetrate our defenses.
+- Moves: During a move, new zombies appear and/or existing ones move forward one space to the left. Then the shooters fire. This two-step process repeats.
+If a zombie reaches a shooter's position, it destroys that shooter. In the example image above, the zombie at [4,4] on the left reaches the shooter at [4,2] and destroys it. The zombie has 1 health point remaining and is eliminated in the same move by the shooter at [4,0].
+
+- Numbered shooters shoot straight (to the right) a given number of times per move. In the example image, the green numbered shooter at [0,0] fires 2 times per move.
+
+- S-shooters shoot straight, and diagonally upward and downward (ie. three directions simultaneously) once per move. In the example image, the blue and orange S-shooters can attack zombies in any of the blue and orange squares, respectively (if not blocked by other zombies).
+At move 3 the blue shooter can only hit the zombie at [1,5] while the orange shooter hits each of the zombies at [1,5], [2,7], and [4,6] once for that move.
+
+- Shooting Priority: The numbered shooters fire all their shots in a cluster, then the S-shooters fire their shots in order from right to left, top to bottom.
+
+Input
+Your function will receive two arguments:
+- Lawn Map: An array/list consisting of strings, where each string represents a row of the map. Each string will consist of either " " (space character) which represents empty space, a numeric digit (0-9) representing a numbered shooter, or the letter S representing an S-shooter.
+- Zombie Stats: An array of subarrays representing each zombie, in the following format:
+[i,row,hp] - where i is the move number (0-based) when it appears, row is the row the zombie walks down, and hp is the initial health point value of the zombie.
+When new zombies appear, they start at the farthest right column of their row.
+Input will always be valid.
+
+Output
+Return the number of moves before the first zombie penetrates our defenses (by getting past column 0), or null/None if all zombies are eliminated.
+
+Test Example
+lawn = [
+    '2       ',
+    '  S     ',
+    '21  S   ',
+    '13      ',
+    '2 3     '
+]
+zombies = [[0,4,28],[1,1,6],[2,0,10],[2,4,15],[3,2,16],[3,3,13]]
+plants_and_zombies(lawn,zombies); #10
+"""
+import copy
+def plants_and_zombies(lawn,zombies):
+  d = {} 
+  # d[step] = zombie
+  max_step = -1
+  for z in zombies:
+    if not z[0] in d:
+      d[z[0]]=[]
+      if z[0]>max_step:
+        max_step = z[0]
+    d[z[0]].append((z[1],z[2]))
+  n_plant = {} 
+  # integer plants and their power row-wise
+  for x in range(len(lawn)):
+    power = 0
+    for y in range(len(lawn[0])):
+      if lawn[x][y]!=' ' and lawn[x][y]!='S':
+        power += int(lawn[x][y])
+    n_plant[x] = power
+  attack = [] 
+  # zombies in lawn and their stats
+  # [row, col, hp]
+  step = -1
+  while True:
+    step += 1
+    for z in attack:
+      z[1] -= 1
+      if z[1]==-1:
+        return step
+    if step in d:
+      for z in d[step]:
+        attack.append([z[0],len(lawn[0])-1,z[1]])
+        
+    for z in attack:
+      temp = lawn[z[0]][z[1]]
+      if temp!=' ':
+        lawn[z[0]]=lawn[z[0]][:(z[1])]+' '+lawn[z[0]][(z[1]+1):]
+        if temp!='S':
+          n_plant[z[0]] -= int(temp)
+          
+    n_attack = n_plant.copy()
+    for z in attack:
+      if n_attack[z[0]]<z[2]:
+        z[2] -= n_attack[z[0]]
+        n_attack[z[0]] = 0
+      else:
+        n_attack[z[0]] -= z[2]
+        z[2] = 0
+        
+    for c in range(len(lawn[0])-1,-1,-1):
+      for r in range(len(lawn)):
+        if lawn[r][c]=='S':
+          ahead = True
+          up = True
+          down = True
+          for n,z in enumerate(attack):
+            if z[1]>c:
+              if z[0]==r and ahead == True and z[2]>0:
+                z[2] -= 1
+                ahead = False
+              if z[0]+z[1]==r+c and up == True and z[2]>0:
+                z[2] -= 1
+                up = False
+              if z[0]-z[1]==r-c and down == True and z[2]>0:
+                z[2] -= 1
+                down = False
+    die = []
+    for n,z in enumerate(attack):
+      if not z[2]>0:
+        die.append(n)
+    attack = [attack[n] for n in range(len(attack)) if not n in die]
+    if not step<max_step and len(attack)==0:
+      return None
